@@ -4,21 +4,35 @@ import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
 
-export default function PasswordInputWithConfirm() {
+interface PasswordInputWithConfirmProps {
+  onChange?: (password: string, isValid: boolean) => void;
+  hasError?: boolean;
+}
+
+export default function PasswordInputWithConfirm({ 
+  onChange, 
+  hasError = false 
+}: PasswordInputWithConfirmProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [passwordsMatch, setPasswordsMatch] = useState(true)
   
-  // Check if passwords match whenever either password changes
+  // Check password validity and notify parent component
   useEffect(() => {
-    if (confirmPassword) {
-      setPasswordsMatch(password === confirmPassword)
-    } else {
-      setPasswordsMatch(true)
+    // Only check match if confirmPassword has a value
+    const match = !confirmPassword || password === confirmPassword
+    if(match){
+      setPasswordsMatch(match)
     }
-  }, [password, confirmPassword])
+    
+    // Notify parent component
+    if (onChange) {
+      const isValid = password.length >= 8 && match
+      onChange(password, isValid)
+    }
+  }, [password, confirmPassword, onChange])
   
   return (
     <div className="space-y-3">
@@ -29,7 +43,7 @@ export default function PasswordInputWithConfirm() {
           type={showPassword ? "text" : "password"}
           placeholder="Choose a strong password"
           required
-          className="pr-10"
+          className={`pr-10 ${hasError ? "border-destructive focus-visible:ring-destructive" : ""}`}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           minLength={8}
@@ -38,6 +52,7 @@ export default function PasswordInputWithConfirm() {
           type="button"
           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
           onClick={() => setShowPassword(!showPassword)}
+          tabIndex={-1}
         >
           {showPassword ? (
             <EyeIcon className="h-4 w-4" />
@@ -54,7 +69,7 @@ export default function PasswordInputWithConfirm() {
           type={showConfirmPassword ? "text" : "password"}
           placeholder="Confirm your password"
           required
-          className={`pr-10 ${!passwordsMatch ? "border-destructive focus-visible:ring-destructive" : ""}`}
+          className={`pr-10 ${!passwordsMatch || hasError ? "border-destructive focus-visible:ring-destructive" : ""}`}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
@@ -62,6 +77,7 @@ export default function PasswordInputWithConfirm() {
           type="button"
           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          tabIndex={-1}
         >
           {showConfirmPassword ? (
             <EyeIcon className="h-4 w-4" />
@@ -71,7 +87,7 @@ export default function PasswordInputWithConfirm() {
         </button>
       </div>
       
-      {!passwordsMatch && (
+      {!passwordsMatch && confirmPassword && (
         <p className="text-destructive text-xs">Passwords do not match</p>
       )}
       
@@ -80,4 +96,4 @@ export default function PasswordInputWithConfirm() {
       </div>
     </div>
   )
-} 
+}

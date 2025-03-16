@@ -1,5 +1,5 @@
 // Doctor Consultation Interface
-interface DoctorConsultation {
+export interface DoctorConsultation {
     doctor_id: string; // UUID
     doctor_name: string;
     doctor_address: string | null;
@@ -9,7 +9,7 @@ interface DoctorConsultation {
   }
   
   // Customer Interface
-  interface Customer {
+  export interface Customer {
     customer_id: string; // UUID
     name: string;
     address: string;
@@ -21,17 +21,20 @@ interface DoctorConsultation {
   }
   
   // User Authentication Interface
-  interface User {
+  export interface User {
     user_id: string; // UUID
     customer_id: string | null; // UUID reference to customer
     email: string;
     password: string | null; // Null for OAuth-only users
     created_at: Date;
     updated_at: Date;
+    provider?: string; // Added for OAuth provider info
+    name?: string; // Added for user display name
+    image?: string; // Added for user profile image
   }
   
   // OAuth Account Interface
-  interface Account {
+  export interface Account {
     id: string; // UUID
     user_id: string; // UUID reference to user
     type: string;
@@ -47,7 +50,7 @@ interface DoctorConsultation {
   }
   
   // Session Interface
-  interface Session {
+  export interface Session {
     id: string; // UUID
     session_token: string;
     user_id: string; // UUID reference to user
@@ -62,7 +65,7 @@ interface DoctorConsultation {
   }
   
   // Medicine Shop Interface
-  interface MedicineShop {
+  export interface MedicineShop {
     shop_id: string; // UUID
     shop_name: string;
     shop_address: string;
@@ -70,7 +73,7 @@ interface DoctorConsultation {
   }
   
   // Brand Interface
-  interface Brand {
+  export interface Brand {
     brand_id: string; // UUID
     brand_name: string;
     brand_location: string | null;
@@ -78,7 +81,7 @@ interface DoctorConsultation {
   }
   
   // Product Interface
-  interface Product {
+  export interface Product {
     product_id: string; // UUID
     product_name: string;
     product_type: string;
@@ -95,7 +98,7 @@ interface DoctorConsultation {
   }
   
   // Cart Interface
-  interface Cart {
+  export interface Cart {
     cart_id: string; // UUID
     customer_id: string; // UUID reference to customer
     delivery_time: string | null; // Time in HH:MM:SS format
@@ -103,7 +106,7 @@ interface DoctorConsultation {
   }
   
   // Cart Items Interface
-  interface CartItem {
+  export interface CartItem {
     cart_id: string; // UUID reference to cart
     product_id: string; // UUID reference to product
     quantity: number;
@@ -113,7 +116,7 @@ interface DoctorConsultation {
   type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   
   // Order Interface
-  interface Order {
+  export interface Order {
     order_id: string; // UUID
     customer_id: string; // UUID reference to customer
     order_date: Date;
@@ -128,7 +131,7 @@ interface DoctorConsultation {
   type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
   
   // Payment Interface
-  interface Payment {
+  export interface Payment {
     payment_id: string; // UUID
     order_id: string; // UUID reference to order
     transaction_id: string | null;
@@ -144,7 +147,7 @@ interface DoctorConsultation {
   }
   
   // Order Items Interface
-  interface OrderItem {
+  export interface OrderItem {
     order_id: string; // UUID reference to order
     product_id: string; // UUID reference to product
     quantity: number;
@@ -152,7 +155,7 @@ interface DoctorConsultation {
   }
   
   // Wishlist Interface
-  interface WishlistItem {
+  export interface WishlistItem {
     customer_id: string; // UUID reference to customer
     product_id: string; // UUID reference to product
     added_date: Date;
