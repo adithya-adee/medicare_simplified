@@ -22,7 +22,7 @@ export function SignOut() {
   if (!session?.user) {
     // Redirect after showing message
     setTimeout(() => {
-      window.location.href = "/sign-in";
+      window.location.href = "/user";
     }, 2000);
 
     return (

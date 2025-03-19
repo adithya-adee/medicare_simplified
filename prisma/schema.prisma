@@ -19,10 +19,10 @@ model brand {
 
 model cart {
   cart_id       String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  customer_id   String?      @unique @db.Uuid
+  customer_id   String?
   delivery_time DateTime?    @db.Time(6)
   created_at    DateTime?    @default(now()) @db.Timestamp(6)
-  customer      customer?    @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade, onUpdate: NoAction)
+  customer      customer?    @relation(fields: [customer_id], references: [customer_id], onDelete: NoAction, onUpdate: NoAction)
   cart_items    cart_items[]
 }
 
@@ -39,20 +39,19 @@ model cart_items {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model customer {
-  customer_id         String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name                String               @db.VarChar(50)
-  address             String               @db.VarChar(250)
-  phone_no            String?              @db.VarChar(15)
-  pincode             Int
-  age                 Int
-  gender              String?              @db.VarChar(7)
+  customer_id         String               @id @default(dbgenerated("uuid_generate_v4()"))
+  address             String?
+  phone_no            String?
+  pincode             Int?
+  age                 Int?
+  gender              String?
   doctor_id           String?              @db.Uuid
-  cart                cart?
+  cart                cart[]
   doctor_consultation doctor_consultation? @relation(fields: [doctor_id], references: [doctor_id], onUpdate: NoAction)
+  user                user                 @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_customer_user")
   order_table         order_table[]
   payment             payment[]
-  users               users?
-  wishlist            wishlist[]
+  wishlist            wishlist[]           @ignore
 
   @@index([phone_no], map: "idx_customer_phone")
 }
@@ -86,7 +85,7 @@ model payment {
   payment_status      payment_status @default(pending)
   payment_date        DateTime?      @default(now()) @db.Timestamp(6)
   coupon_applied      Boolean?       @default(false)
-  customer_id         String?        @db.Uuid
+  customer_id         String?
   razorpay_order_id   String?        @db.VarChar(255)
   razorpay_payment_id String?        @db.VarChar(255)
   razorpay_signature  String?        @db.VarChar(255)
@@ -117,40 +116,22 @@ model product {
   order_items                order_items[]
   brand                      brand?         @relation(fields: [product_brand_id], references: [brand_id], onDelete: Cascade, onUpdate: NoAction)
   medicine_shop              medicine_shop? @relation(fields: [product_shop_id], references: [shop_id], onDelete: Cascade, onUpdate: NoAction)
-  wishlist                   wishlist[]
+  wishlist                   wishlist[]     @ignore
 
   @@index([product_name], map: "idx_product_name")
   @@index([product_price], map: "idx_product_price")
   @@index([product_type], map: "idx_product_type")
 }
 
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 model wishlist {
-  customer_id String    @db.Uuid
+  customer_id String
   product_id  String    @db.Uuid
   added_date  DateTime? @default(now()) @db.Timestamp(6)
-  customer    customer  @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade, onUpdate: NoAction)
+  customer    customer  @relation(fields: [customer_id], references: [customer_id], onDelete: NoAction, onUpdate: NoAction)
   product     product   @relation(fields: [product_id], references: [product_id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@id([customer_id, product_id])
-}
-
-model accounts {
-  id                  String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user_id             String  @db.Uuid
-  type                String  @db.VarChar(255)
-  provider            String  @db.VarChar(255)
-  provider_account_id String  @db.VarChar(255)
-  refresh_token       String?
-  access_token        String?
-  expires_at          BigInt?
-  token_type          String? @db.VarChar(255)
-  scope               String? @db.VarChar(255)
-  id_token            String?
-  session_state       String? @db.VarChar(255)
-  users               users   @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([provider, provider_account_id])
-  @@index([user_id], map: "idx_accounts_user_id")
+  @@ignore
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -167,7 +148,7 @@ model order_items {
 
 model order_table {
   order_id         String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  customer_id      String?       @db.Uuid
+  customer_id      String?
   order_date       DateTime?     @default(now()) @db.Timestamp(6)
   total_amount     Decimal?      @db.Decimal(10, 2)
   order_status     order_status  @default(pending)
@@ -183,18 +164,13 @@ model order_table {
   @@index([order_status], map: "idx_order_status")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model users {
-  user_id     String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  customer_id String?    @unique @db.Uuid
-  email       String     @unique @db.VarChar(100)
-  password    String     @db.VarChar(255)
-  created_at  DateTime?  @default(now()) @db.Timestamp(6)
-  updated_at  DateTime?  @default(now()) @db.Timestamp(6)
-  accounts    accounts[]
-  customer    customer?  @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([email], map: "idx_users_email")
+model user {
+  id         String    @id(map: "User_pkey")
+  name       String
+  email      String    @unique(map: "User_email_key")
+  provider   String?   @default("GOOGLE")
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  customer   customer?
 }
 
 enum order_status {

@@ -1,163 +1,170 @@
-// Doctor Consultation Interface
+export enum PaymentStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  REFUNDED = 'refunded'
+}
+
+export enum OrderStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  SHIPPED = 'shipped',
+  DELIVERED = 'delivered',
+  CANCELLED = 'cancelled'
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  provider?: string;
+  created_at?: Date;
+  customer?: Customer;
+}
+
+export interface Customer {
+  customer_id: string;
+  address?: string;
+  phone_no?: string;
+  pincode?: number;
+  age?: number;
+  gender?: string;
+  doctor_id?: string;
+  user: User;
+  cart?: Cart[];
+  orders?: OrderTable[];
+  payments?: Payment[];
+  // Ignored in schema but included for completeness
+  wishlist?: Wishlist[];
+}
+
+export interface Cart {
+  cart_id: string;
+  customer_id?: string;
+  delivery_time?: Date;
+  created_at?: Date;
+  customer?: Customer;
+  cart_items: CartItem[];
+}
+export interface CartItem {
+  cart_id: string;
+  product_id: string;
+  quantity?: number;
+  cart: Cart;
+  product: Product;
+}
+
+export interface Product {
+  product_id: string;
+  product_name: string;
+  product_type: string;
+  product_quantity: string;
+  product_img_link?: string;
+  product_based_on_gender?: string;
+  product_age_group?: string;
+  product_price?: number;
+  product_commission_percent?: number;
+  product_mfg_date?: Date;
+  product_exp_date?: Date;
+  product_shop_id?: string;
+  product_brand_id?: string;
+  medicine_shop?: MedicineShop;
+  brand?: Brand;
+  cart_items?: CartItem[];
+  order_items?: OrderItem[];
+  // Ignored in schema but included for completeness
+  wishlist?: Wishlist[];
+}
+
+
+export interface Brand {
+  brand_id: string;
+  brand_name: string;
+  brand_location?: string;
+  brand_official_phone?: string;
+  products?: Product[];
+}
+
+
+export interface MedicineShop {
+  shop_id: string;
+  shop_name: string;
+  shop_address: string;
+  shop_phone_no?: string;
+  products?: Product[];
+}
+
+export interface OrderTable {
+  order_id: string;
+  customer_id?: string;
+  order_date?: Date;
+  total_amount?: number;
+  order_status: OrderStatus;
+  shipping_address?: string;
+  billing_address?: string;
+  shipping_method?: string;
+  customer?: Customer;
+  order_items: OrderItem[];
+  payments?: Payment[];
+}
+
+export interface OrderItem {
+  order_id: string;
+  product_id: string;
+  quantity?: number;
+  price_per_unit?: number;
+  order_table: OrderTable;
+  product: Product;
+}
+
+export interface Payment {
+  payment_id: string;
+  order_id?: string;
+  transaction_id?: string;
+  total_price?: number;
+  payment_method?: string;
+  payment_status: PaymentStatus;
+  payment_date?: Date;
+  coupon_applied?: boolean;
+  customer_id?: string;
+  razorpay_order_id?: string;
+  razorpay_payment_id?: string;
+  razorpay_signature?: string;
+  customer?: Customer;
+  order_table?: OrderTable;
+}
+
 export interface DoctorConsultation {
-    doctor_id: string; // UUID
-    doctor_name: string;
-    doctor_address: string | null;
-    doctor_phone_no: string | null;
-    doctor_qualification: string;
-    doctor_specialization: string;
-  }
-  
-  // Customer Interface
-  export interface Customer {
-    customer_id: string; // UUID
-    name: string;
-    address: string;
-    phone_no: string | null;
-    pincode: number;
-    age: number;
-    gender: 'MALE' | 'FEMALE' | 'OTHER' | null;
-    doctor_id: string | null; // UUID reference to doctor
-  }
-  
-  // User Authentication Interface
-  export interface User {
-    user_id: string; // UUID
-    customer_id: string | null; // UUID reference to customer
-    email: string;
-    password: string | null; // Null for OAuth-only users
-    created_at: Date;
-    updated_at: Date;
-    provider?: string; // Added for OAuth provider info
-    name?: string; // Added for user display name
-    image?: string; // Added for user profile image
-  }
-  
-  // OAuth Account Interface
-  export interface Account {
-    id: string; // UUID
-    user_id: string; // UUID reference to user
-    type: string;
-    provider: string;
-    provider_account_id: string;
-    refresh_token: string | null;
-    access_token: string | null;
-    expires_at: number | null;
-    token_type: string | null;
-    scope: string | null;
-    id_token: string | null;
-    session_state: string | null;
-  }
-  
-  // Session Interface
-  export interface Session {
-    id: string; // UUID
-    session_token: string;
-    user_id: string; // UUID reference to user
-    expires: Date;
-  }
-  
-  // Verification Token Interface
-  interface VerificationToken {
-    identifier: string;
-    token: string;
-    expires: Date;
-  }
-  
-  // Medicine Shop Interface
-  export interface MedicineShop {
-    shop_id: string; // UUID
-    shop_name: string;
-    shop_address: string;
-    shop_phone_no: string | null;
-  }
-  
-  // Brand Interface
-  export interface Brand {
-    brand_id: string; // UUID
-    brand_name: string;
-    brand_location: string | null;
-    brand_official_phone: string | null;
-  }
-  
-  // Product Interface
-  export interface Product {
-    product_id: string; // UUID
-    product_name: string;
-    product_type: string;
-    product_quantity: string;
-    product_img_link: string | null;
-    product_based_on_gender: 'MALE' | 'FEMALE' | 'OTHER' | null;
-    product_age_group: 'INFANT' | 'CHILDREN' | 'ADULT' | 'ANY' | null;
-    product_price: number;
-    product_commission_percent: number;
-    product_mfg_date: Date | null;
-    product_exp_date: Date | null;
-    product_shop_id: string; // UUID reference to shop
-    product_brand_id: string; // UUID reference to brand
-  }
-  
-  // Cart Interface
-  export interface Cart {
-    cart_id: string; // UUID
-    customer_id: string; // UUID reference to customer
-    delivery_time: string | null; // Time in HH:MM:SS format
-    created_at: Date;
-  }
-  
-  // Cart Items Interface
-  export interface CartItem {
-    cart_id: string; // UUID reference to cart
-    product_id: string; // UUID reference to product
-    quantity: number;
-  }
-  
-  // Order Status Type
-  type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  
-  // Order Interface
-  export interface Order {
-    order_id: string; // UUID
-    customer_id: string; // UUID reference to customer
-    order_date: Date;
-    total_amount: number;
-    order_status: OrderStatus;
-    shipping_address: string | null;
-    billing_address: string | null;
-    shipping_method: string | null;
-  }
-  
-  // Payment Status Type
-  type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
-  
-  // Payment Interface
-  export interface Payment {
-    payment_id: string; // UUID
-    order_id: string; // UUID reference to order
-    transaction_id: string | null;
-    total_price: number;
-    payment_method: string | null;
-    payment_status: PaymentStatus;
-    payment_date: Date;
-    coupon_applied: boolean;
-    customer_id: string; // UUID reference to customer
-    razorpay_order_id: string | null;
-    razorpay_payment_id: string | null;
-    razorpay_signature: string | null;
-  }
-  
-  // Order Items Interface
-  export interface OrderItem {
-    order_id: string; // UUID reference to order
-    product_id: string; // UUID reference to product
-    quantity: number;
-    price_per_unit: number;
-  }
-  
-  // Wishlist Interface
-  export interface WishlistItem {
-    customer_id: string; // UUID reference to customer
-    product_id: string; // UUID reference to product
-    added_date: Date;
-  }
-  
+  doctor_id: string;
+  doctor_name: string;
+  doctor_address?: string;
+  doctor_phone_no?: string;
+  doctor_qualification: string;
+  doctor_specialization: string;
+  customers?: Customer[];
+}
+
+export interface Wishlist {
+  customer_id: string;
+  product_id: string;
+  added_date?: Date;
+  customer: Customer;
+  product: Product;
+}
+
+/**
+ * Request DTO for user creation/login
+ */
+export interface UserLoginRequest {
+  id: string;
+  email: string;
+  name: string;
+}
+
+/**
+ * Response DTO for user creation/login
+ */
+export interface UserLoginResponse {
+  message: string;
+  user: User;
+}
