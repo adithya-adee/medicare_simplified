@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { User,Customer } from "@/type/interface";
 
 export default function SignInPage() {
   const { data: session, status } = useSession();
@@ -60,7 +59,7 @@ export default function SignInPage() {
       setIsLoading(false);
     }
   };
-  // Handle session data and API call
+
   useEffect(() => {
     setIsClient(true);
 
