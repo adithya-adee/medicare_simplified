@@ -75,6 +75,7 @@ export default function LoginPage() {
         router.refresh(); // Ensure the session is updated in the layout
             }
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Login Error",
         description: "An unexpected error occurred.",

@@ -141,7 +141,7 @@ export default async function OrdersPage() {
             ) : (
               <div className="p-8 text-center">
                 <h3 className="text-lg font-medium mb-2">No orders yet</h3>
-                <p className="text-gray-500 mb-6">You haven't placed any orders with us.</p>
+                <p className="text-gray-500 mb-6">You haven&apos;t placed any orders with us.</p>
                 <Link
                   href="/products"
                   className="inline-block bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"

@@ -21,6 +21,9 @@ const prismaClientSingleton = () => {
 // Use `globalThis` to ensure we use the same instance across the app
 export const prisma = globalThis.prisma ?? prismaClientSingleton();
 
+// Export as 'db' for compatibility with imports in other files
+export const db = prisma;
+
 if (process.env.NODE_ENV !== 'production') {
   globalThis.prisma = prisma;
 }

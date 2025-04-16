@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata = {
@@ -159,7 +158,7 @@ export default function AboutPage() {
       <div className="text-center bg-blue-50 rounded-lg p-8">
         <h2 className="text-2xl font-semibold mb-4">Join Our Journey</h2>
         <p className="text-gray-600 max-w-2xl mx-auto mb-6">
-          We're on a mission to transform healthcare accessibility. Whether you're a customer, partner, or potential team member, we'd love to connect with you.
+          We&apos;re on a mission to transform healthcare accessibility. Whether you&apos;re a customer, partner, or potential team member, we&apos;d love to connect with you.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link 

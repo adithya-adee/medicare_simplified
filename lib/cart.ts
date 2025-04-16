@@ -1,5 +1,5 @@
 import { prisma } from "./db";
-import { Prisma, Cart, CartItem, Product } from "@prisma/client";
+import { Cart, CartItem, Product } from "@prisma/client";
 
 // Type definition for Cart with items and product details
 export type CartWithDetails = Cart & {
