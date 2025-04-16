@@ -11,8 +11,8 @@ import Footer from "@/components/layout/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "E-Commerce Platform",
-  description: "A modern e-commerce platform built with Next.js and Prisma",
+  title: "Medicare Simplified",
+  description: "An Online Pharmacy",
 };
 
 export default function RootLayout({

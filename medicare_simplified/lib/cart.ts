@@ -1,5 +1,5 @@
-import { prisma } from './db';
-import { Prisma, Cart, CartItem, Product } from '@prisma/client';
+import { prisma } from "./db";
+import { Prisma, Cart, CartItem, Product } from "@prisma/client";
 
 // Type definition for Cart with items and product details
 export type CartWithDetails = Cart & {
@@ -9,16 +9,20 @@ export type CartWithDetails = Cart & {
 };
 
 // Get or create a cart for a user
-export const getOrCreateCart = async (userId: string): Promise<CartWithDetails> => {
+export const getOrCreateCart = async (
+  userId: string
+): Promise<CartWithDetails> => {
   let cart = await prisma.cart.findUnique({
-    where: { userId },
+    where: {
+      userId,
+    },
     include: {
       items: {
         include: {
           product: true,
         },
         orderBy: {
-          createdAt: 'asc',
+          createdAt: "asc",
         },
       },
     },
@@ -41,9 +45,13 @@ export const getOrCreateCart = async (userId: string): Promise<CartWithDetails> 
 };
 
 // Add item to cart or update quantity
-export const addItemToCart = async (userId: string, productId: string, quantity: number): Promise<CartWithDetails> => {
+export const addItemToCart = async (
+  userId: string,
+  productId: string,
+  quantity: number
+): Promise<CartWithDetails> => {
   const cart = await getOrCreateCart(userId);
-
+  console.log("USER :",userId)
   const existingItem = cart.items.find((item) => item.productId === productId);
 
   if (existingItem) {
@@ -68,7 +76,10 @@ export const addItemToCart = async (userId: string, productId: string, quantity:
 };
 
 // Update item quantity in cart
-export const updateCartItemQuantity = async (cartItemId: string, quantity: number): Promise<CartItem> => {
+export const updateCartItemQuantity = async (
+  cartItemId: string,
+  quantity: number
+): Promise<CartItem> => {
   if (quantity <= 0) {
     // If quantity is zero or less, remove the item
     return prisma.cartItem.delete({ where: { id: cartItemId } });
@@ -80,7 +91,9 @@ export const updateCartItemQuantity = async (cartItemId: string, quantity: numbe
 };
 
 // Remove item from cart
-export const removeItemFromCart = async (cartItemId: string): Promise<CartItem> => {
+export const removeItemFromCart = async (
+  cartItemId: string
+): Promise<CartItem> => {
   return prisma.cartItem.delete({ where: { id: cartItemId } });
 };
 
@@ -90,4 +103,4 @@ export const clearCart = async (userId: string): Promise<CartWithDetails> => {
   await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
   // Re-fetch the empty cart
   return getOrCreateCart(userId);
-}; 
+};

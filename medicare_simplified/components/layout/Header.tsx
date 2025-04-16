@@ -43,7 +43,7 @@ export default function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="text-xl font-bold">
-              E-Commerce
+              Medicare Simplified
             </Link>
           </div>
 
@@ -69,9 +69,7 @@ export default function Header() {
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-                  0
-                </span>
+                
               </Button>
             </Link>
 
@@ -119,7 +117,7 @@ export default function Header() {
                 <div className="flex flex-col h-full">
                   <div className="flex items-center justify-between">
                     <Link href="/" className="text-xl font-bold" onClick={() => setOpen(false)}>
-                      E-Commerce
+                      Medicare Simplified
                     </Link>
                     <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
                       <X className="h-5 w-5" />

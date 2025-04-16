@@ -6,7 +6,7 @@ import { Product, Category } from "@prisma/client";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useToast } from "@//hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
 interface ProductCardProps {
@@ -53,7 +53,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Card className="overflow-hidden">
       <Link href={`/products/${product.id}`}>
         <div className="aspect-square relative bg-zinc-100">
-          {product.images && product.images.length > 0 ? (
+          {!product.images && product.images.length > 0 ? (
             <Image
               src={product.images[0]}
               alt={product.name}
@@ -82,9 +82,6 @@ export default function ProductCard({ product }: ProductCardProps) {
         <Link href={`/products/${product.id}`} className="hover:underline">
           <h3 className="font-semibold mb-1">{product.name}</h3>
         </Link>
-        {product.brand && (
-          <p className="text-sm text-zinc-600 mb-2">Brand: {product.brand}</p>
-        )}
         <div className="flex items-center gap-2">
           <p className="font-bold">${finalPrice.toFixed(2)}</p>
           {product.discount && (
