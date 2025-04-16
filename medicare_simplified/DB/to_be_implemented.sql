@@ -1,0 +1,195 @@
+-- Function for processing payments
+-- CREATE OR REPLACE FUNCTION process_payment(
+--   p_user_id TEXT,
+--   p_amount DECIMAL(10, 2),
+--   p_method "PaymentMethod",
+--   p_transaction_id TEXT
+-- ) RETURNS TEXT AS $$
+-- DECLARE
+--   v_payment_id TEXT;
+--   v_payment_status "PaymentStatus";
+-- BEGIN
+--   -- Begin transaction
+--   BEGIN
+--     -- Simulate payment processing
+--     IF p_amount <= 0 THEN
+--       RAISE EXCEPTION 'Invalid payment amount';
+--     END IF;
+    
+--     -- Set payment status based on transaction simulation logic
+--     -- In a real system, this would interact with payment gateways
+--     IF p_transaction_id IS NULL THEN
+--       v_payment_status := 'FAILED';
+--     ELSE
+--       v_payment_status := 'COMPLETED';
+--     END IF;
+    
+--     -- Create payment record
+--     INSERT INTO "Payment" (
+--       "amount", 
+--       "method", 
+--       "status", 
+--       "transactionId"
+--     ) VALUES (
+--       p_amount,
+--       p_method,
+--       v_payment_status,
+--       p_transaction_id
+--     ) RETURNING "id" INTO v_payment_id;
+    
+--     -- Return the payment ID
+--     RETURN v_payment_id;
+--   EXCEPTION
+--     WHEN OTHERS THEN
+--       -- Handle exceptions
+--       RAISE NOTICE 'Payment processing failed: %', SQLERRM;
+--       RETURN NULL;
+--   END;
+-- END;
+-- $$ LANGUAGE plpgsql;
+
+-- -- Function to create an order from a cart
+-- CREATE OR REPLACE FUNCTION create_order_from_cart(
+--   p_user_id TEXT,
+--   p_address_id TEXT,
+--   p_payment_method "PaymentMethod",
+--   p_transaction_id TEXT
+-- ) RETURNS TEXT AS $$
+-- DECLARE
+--   v_cart_id TEXT;
+--   v_cart_total DECIMAL(10, 2) := 0;
+--   v_payment_id TEXT;
+--   v_order_id TEXT;
+--   v_cart_item RECORD;
+--   v_product_record RECORD;
+-- BEGIN
+--   -- Begin transaction
+--   BEGIN
+--     -- Get cart ID
+--     SELECT "id" INTO v_cart_id FROM "Cart" WHERE "userId" = p_user_id;
+    
+--     IF v_cart_id IS NULL THEN
+--       RAISE EXCEPTION 'Cart not found for user';
+--     END IF;
+    
+--     -- Calculate total from cart items
+--     SELECT COALESCE(SUM(ci.quantity * p.price), 0)
+--     INTO v_cart_total
+--     FROM "CartItem" ci
+--     JOIN "Product" p ON ci.productId = p.id
+--     WHERE ci.cartId = v_cart_id;
+    
+--     -- Process payment
+--     v_payment_id := process_payment(p_user_id, v_cart_total, p_payment_method, p_transaction_id);
+    
+--     IF v_payment_id IS NULL THEN
+--       RAISE EXCEPTION 'Payment processing failed';
+--     END IF;
+    
+--     -- Create order
+--     INSERT INTO "Order" (
+--       "userId",
+--       "status",
+--       "total",
+--       "addressId",
+--       "paymentId"
+--     ) VALUES (
+--       p_user_id,
+--       'PENDING',
+--       v_cart_total,
+--       p_address_id,
+--       v_payment_id
+--     ) RETURNING "id" INTO v_order_id;
+    
+--     -- Transfer cart items to order items
+--     FOR v_cart_item IN 
+--       SELECT * FROM "CartItem" WHERE "cartId" = v_cart_id
+--     LOOP
+--       -- Get product information
+--       SELECT * INTO v_product_record FROM "Product" WHERE "id" = v_cart_item.productId;
+      
+--       -- Check stock
+--       IF v_product_record.stock < v_cart_item.quantity THEN
+--         RAISE EXCEPTION 'Insufficient stock for product %', v_product_record.name;
+--       END IF;
+      
+--       -- Create order item
+--       INSERT INTO "OrderItem" (
+--         "orderId",
+--         "productId",
+--         "quantity",
+--         "price"
+--       ) VALUES (
+--         v_order_id,
+--         v_cart_item.productId,
+--         v_cart_item.quantity,
+--         v_product_record.price
+--       );
+      
+--       -- Update product stock
+--       UPDATE "Product"
+--       SET "stock" = "stock" - v_cart_item.quantity
+--       WHERE "id" = v_cart_item.productId;
+--     END LOOP;
+    
+--     -- Clear cart
+--     DELETE FROM "CartItem" WHERE "cartId" = v_cart_id;
+    
+--     -- Return the order ID
+--     RETURN v_order_id;
+--   EXCEPTION
+--     WHEN OTHERS THEN
+--       -- Rollback will happen automatically
+--       RAISE NOTICE 'Order creation failed: %', SQLERRM;
+--       RETURN NULL;
+--   END;
+-- END;
+-- $$ LANGUAGE plpgsql;
+
+
+
+-- Function to get product recommendations based on user purchase history
+-- CREATE OR REPLACE FUNCTION get_product_recommendations(
+--   p_user_id TEXT,
+--   p_limit INTEGER DEFAULT 5
+-- ) RETURNS TABLE (
+--   product_id TEXT,
+--   product_name TEXT,
+--   category_name TEXT,
+--   price DECIMAL,
+--   relevance_score DECIMAL
+-- ) AS $$
+-- BEGIN
+--   RETURN QUERY
+--   WITH user_categories AS (
+--     SELECT 
+--       p.categoryId,
+--       COUNT(*) AS purchase_count
+--     FROM "Order" o
+--     JOIN "OrderItem" oi ON o.id = oi.orderId
+--     JOIN "Product" p ON oi.productId = p.id
+--     WHERE o.userId = p_user_id
+--     GROUP BY p.categoryId
+--   )
+--   SELECT 
+--     p.id AS product_id,
+--     p.name AS product_name,
+--     c.name AS category_name,
+--     p.price,
+--     (uc.purchase_count * 0.6 + COALESCE(AVG(r.rating), 3) * 0.4)::DECIMAL(10, 2) AS relevance_score
+--   FROM "Product" p
+--   JOIN "Category" c ON p.categoryId = c.id
+--   JOIN user_categories uc ON p.categoryId = uc.categoryId
+--   LEFT JOIN "Review" r ON p.id = r.productId
+--   WHERE p.id NOT IN (
+--     SELECT oi.productId
+--     FROM "Order" o
+--     JOIN "OrderItem" oi ON o.id = oi.orderId
+--     WHERE o.userId = p_user_id
+--   )
+--   GROUP BY p.id, p.name, c.name, p.price, uc.purchase_count
+--   ORDER BY relevance_score DESC
+--   LIMIT p_limit;
+-- END;
+-- $$ LANGUAGE plpgsql;
+
