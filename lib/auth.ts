@@ -1,71 +1,94 @@
-import NextAuth, { type AuthOptions, type User as NextAuthUser } from "next-auth";
+import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./db";
+import { NextAuthOptions } from "next-auth";
+import { getServerSession } from "next-auth/next";
 
+// Extend the built-in session and JWT types
 declare module "next-auth" {
   interface Session {
-    user: NextAuthUser & {
+    user: {
       id: string;
-      // Add other custom properties here if needed, e.g., role: string;
+      email: string;
+      name?: string;
+      image?: string;
+      role?: string;
     };
+  }
+
+  interface User {
+    id: string;
+    email: string;
+    name?: string;
+    image?: string;
+    role?: string;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
-    // Add other custom properties here if needed
+    role?: string;
   }
 }
 
-// Removed ExtendedUser type definition as it's no longer needed
-
-export const authOptions: AuthOptions = {
+// Define authOptions separately for reuse
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    // Removed CredentialsProvider
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
   session: {
-    strategy: "jwt", // Using JWT strategy is generally recommended, especially with database adapters
+    strategy: "jwt",
   },
   callbacks: {
-    // Include user.id on session
-    async session({ session, token }) {
-      if (token?.id && session.user) { // Keep token.id optional check for robustness
-        session.user.id = token.id as string;
+    // Include user.id and role in session
+    session({ session, token }) {
+      if (session.user && token) {
+        session.user.id = token.id;
+        session.user.role = token.role;
       }
-      // console.log("Session Callback - Session:", session);
       return session;
     },
-    // Include user.id on JWT
+
+    // Fetch and store user details in the JWT
     async jwt({ token, user }) {
-      if (user) { // user is available on initial sign in
+      if (user) {
         token.id = user.id;
+
+        // Get the full user with role from the database
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { role: true },
+        });
+
+        if (dbUser) {
+          token.role = dbUser.role;
+        }
       }
-      // console.log("JWT Callback - Token:", token);
       return token;
     },
   },
   pages: {
-    signIn: '/auth/signin', // Optional: specify custom sign-in page if you have one
-    // error: '/auth/error', // Optional: Custom error page
+    signIn: "/auth/signin",
   },
-  // Enable debug messages in development
-  debug: process.env.NODE_ENV === 'development',
-  secret: process.env.NEXTAUTH_SECRET, // Ensure NEXTAUTH_SECRET env variable is set
+  debug: process.env.NODE_ENV === "development",
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
-// Comments clarifying App Router handler setup
-// The API route handler should be in /app/api/auth/[...nextauth]/route.ts (or .js)
-// Example content for that file:
-// import NextAuth from "next-auth"
-// import { authOptions } from "@/lib/auth" // Adjust path as necessary
-//
-// const handler = NextAuth({});
+// This is the recommended way for Next.js 13+ App Router
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
 
-export const { handlers, signIn, signOut, auth } = NextAuth(authOptions);
+// Export a wrapper function for auth
+export async function auth() {
+  return await getServerSession(authOptions);
+}
+
+// Export utility functions
+export const signIn = NextAuth(authOptions).signIn;
+export const signOut = NextAuth(authOptions).signOut;

@@ -25,7 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-    import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@//hooks/use-toast";
 import { Github } from "lucide-react";
 
@@ -73,9 +73,8 @@ export default function LoginPage() {
         });
         router.push(callbackUrl);
         router.refresh(); // Ensure the session is updated in the layout
-            }
-    } catch (error) {
-      console.error("Login error:", error);
+      }
+    } catch {
       toast({
         title: "Login Error",
         description: "An unexpected error occurred.",
@@ -90,7 +89,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signIn("google", { callbackUrl });
-    } catch (error) {
+    } catch {
       toast({
         title: "Google Sign-In Error",
         description: "Failed to sign in with Google.",
@@ -106,7 +105,7 @@ export default function LoginPage() {
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl">Sign In</CardTitle>
           <CardDescription>
-Enter your email and password to access your account.
+            Enter your email and password to access your account.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -163,7 +162,7 @@ Enter your email and password to access your account.
           </Button>
         </CardContent>
         <CardFooter className="flex justify-center text-sm">
-          <p>Don't have an account?&nbsp;</p>
+          <p>Don&apos;t have an account?&nbsp;</p>
           <Link href="/auth/register" className="text-primary hover:underline">
             Sign up
           </Link>

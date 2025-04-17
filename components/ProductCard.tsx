@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Product, Category } from "@prisma/client";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
@@ -16,7 +15,6 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -34,7 +32,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       setTimeout(() => {
         setIsLoading(false);
       }, 500);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to add product to cart",
@@ -53,7 +51,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Card className="overflow-hidden">
       <Link href={`/products/${product.id}`}>
         <div className="aspect-square relative bg-zinc-100">
-          {!product.images && product.images.length > 0 ? (
+          {product.images && Array.isArray(product.images) && product.images.length > 0 ? (
             <Image
               src={product.images[0]}
               alt={product.name}

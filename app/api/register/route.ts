@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ message: "User registered successfully", user }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     console.error("[REGISTER_POST]", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }

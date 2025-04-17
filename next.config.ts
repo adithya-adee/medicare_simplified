@@ -1,6 +1,5 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     domains: [
       'm.media-amazon.com',
@@ -13,6 +12,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Enable static exports for Vercel
+  output: 'standalone',
+  // Enable React strict mode
+  reactStrictMode: true
 };
 
-export default nextConfig;
+module.exports = nextConfig;

@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import { getMedicines } from "@/lib/product";
 

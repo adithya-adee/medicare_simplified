@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -61,7 +61,7 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       // Call the API route to register the user
-      const response = await axios.post("/api/register", data);
+      await axios.post("/api/register", data);
 
       // Sign in the user after successful registration
       const signInResult = await signIn("credentials", {
@@ -85,10 +85,11 @@ export default function RegisterPage() {
         router.push("/"); // Redirect to home page after successful login
         router.refresh();
       }
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as AxiosError;
       toast({
         title: "Registration Failed",
-        description: error.response?.data?.message || "An unexpected error occurred.",
+        description: axiosError.response?.data?.message || "An unexpected error occurred.",
         variant: "destructive",
       });
     } finally {
@@ -100,7 +101,7 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       await signIn("google", { callbackUrl: "/" });
-    } catch (error) {
+    } catch {
       toast({
         title: "Google Sign-In Error",
         description: "Failed to sign in with Google.",
@@ -116,7 +117,8 @@ export default function RegisterPage() {
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl">Create an Account</CardTitle>
           <CardDescription>
-Enter your details to register.</CardDescription>
+            Enter your details to register.
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
           <Form {...form}>

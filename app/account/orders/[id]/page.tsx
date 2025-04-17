@@ -15,13 +15,12 @@ const statusColors = {
   CANCELLED: 'bg-red-100 text-red-800',
 };
 
-interface OrderDetailPageProps {
-  params: {
-    id: string;
-  };
-}
+type PageProps = {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
-export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
+export default async function OrderDetailPage({ params }: PageProps) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {

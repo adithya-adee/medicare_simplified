@@ -35,7 +35,7 @@ export default function ContactPage() {
             <div>
               <h3 className="font-medium mb-2">Business Hours</h3>
               <p className="text-gray-600 mb-1">Monday - Friday: 9AM - 5PM</p>
-              <p className="text-gray-600">Saturday & Sunday: Closed</p>
+              <p className="text-gray-600">Saturday &amp; Sunday: Closed</p>
             </div>
             
             <div>
@@ -111,7 +111,7 @@ export default function ContactPage() {
             </div>
             <div className="py-4">
               <h3 className="font-medium mb-2">How do I track my order?</h3>
-              <p className="text-gray-600">You can track your order by logging into your account and navigating to the "Orders" section. You'll receive a tracking number via email once your order ships.</p>
+              <p className="text-gray-600">You can track your order by logging into your account and navigating to the &quot;Orders&quot; section. You&apos;ll receive a tracking number via email once your order ships.</p>
             </div>
             <div className="py-4">
               <h3 className="font-medium mb-2">What is your return policy?</h3>
@@ -128,7 +128,7 @@ export default function ContactPage() {
               href="/faq"
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
-              View All FAQs →
+              View All FAQs &rarr;
             </Link>
           </div>
         </div>
