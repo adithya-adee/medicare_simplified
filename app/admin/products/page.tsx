@@ -25,14 +25,28 @@ import { prisma } from "@/lib/db";
 
 export default async function ProductsPage() {
   // Fetch products directly with Prisma
-  const products = await prisma.product.findMany({
-    include: {
-      category: true,
-    },
-    orderBy: {
-      updatedAt: 'desc',
-    },
-  });
+  const products: any[] = await prisma.$queryRaw`
+    SELECT 
+      p.*,
+      c.id as "categoryId",
+      c.name as "categoryName",
+      c.description as "categoryDescription",
+      c.image as "categoryImage"
+    FROM "Product" p
+    LEFT JOIN "Category" c ON p."categoryId" = c.id
+    ORDER BY p."updatedAt" DESC
+  `;
+
+  // Transform the raw query results to add the nested category object
+  const formattedProducts = products.map((product: any) => ({
+    ...product,
+    category: product.categoryId ? {
+      id: product.categoryId,
+      name: product.categoryName,
+      description: product.categoryDescription,
+      image: product.categoryImage
+    } : null
+  }));
 
   return (
     <div className="space-y-6">
@@ -49,7 +63,7 @@ export default async function ProductsPage() {
       {/* Products table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Products ({products.length})</CardTitle>
+          <CardTitle>All Products ({formattedProducts.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -64,14 +78,14 @@ export default async function ProductsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.length === 0 ? (
+              {formattedProducts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center">
                     No products found. Try seeding the database with sample products.
                   </TableCell>
                 </TableRow>
               ) : (
-                products.map((product) => (
+                formattedProducts.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center">
