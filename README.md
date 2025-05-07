@@ -86,5 +86,6 @@ RBAC Implementation: The RBAC implementation details (how roles are assigned and
 
 
 ## Medicare Simplified Preview
-(https://github.com/user-attachments/assets/a8855b87-e817-40a5-b36c-ade89d31afde)
+
+[Medicare Simplified Preview](https://github.com/user-attachments/assets/a8855b87-e817-40a5-b36c-ade89d31afde)
 
